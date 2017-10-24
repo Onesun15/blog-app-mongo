@@ -23,6 +23,8 @@ function lorem() {
     'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 }
 
+
+
 // seed some posts so initial GET requests will return something
 // BlogPosts.create(
 //   '10 things -- you won\'t believe #4', lorem(), 'Billy Bob');
