@@ -11,25 +11,65 @@ const {Blog} = require('./models');
 
 mongoose.Promise = global.Promise;
 
+
+// function lorem() {
+//   return 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod ' +
+//     'tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, ';
+//   'quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo ' +
+//     'consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse ' +
+//     'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non ' +
+//     'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+// }
+
+
 router.get('/', (req, res) => {
   Blog
     .find()
-    .then(post => {
-      res.json({
-        post
-      });
+    .then(posts => {
+      res.json(posts.map(post => post.apiRepr()));
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({error: 'something went terribly wrong'});
     });
 });
-// convenience function for generating lorem text for blog
-// posts we initially add below
-function lorem() {
-  return 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod ' +
-    'tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, ';
-  'quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo ' +
-    'consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse ' +
-    'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non ' +
-    'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-}
+
+router.get('/:id', (req, res) => {
+  Blog
+    .findById(req.params.id)
+    .then(post => {
+      res.json(post.apiRepr());
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json({error: 'something went horribly awry'});
+    });
+});
+
+router.post('/', (req, res) => {
+  const requiredFields = ['title', 'content', 'author'];
+  console.log(requiredFields);
+  requiredFields.forEach(field => {
+    console.log(field, req.body);
+    // if (!(field in req.body)) {
+    //   const message = `You are missing required field: ${field}`;
+    //   console.log(message);
+    //   return res.status(400).send(message);
+    //}
+  });
+  const {title, content, author} = req.body;
+  Blog
+    .create({
+      title,
+      content,
+      author
+    })
+    .then(post => {
+      res.status(201).json(post.apiRepr());
+    });
+});
+
+
 
 
 
