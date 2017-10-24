@@ -7,11 +7,19 @@ const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 const mongoose = require('mongoose');
 
-const {BlogPosts} = require('./models');
+const {Blog} = require('./models');
 
 mongoose.Promise = global.Promise;
 
-router.get('/', (req, res) => res.send('hello world'));
+router.get('/', (req, res) => {
+  Blog
+    .find()
+    .then(post => {
+      res.json({
+        post
+      });
+    });
+});
 // convenience function for generating lorem text for blog
 // posts we initially add below
 function lorem() {
