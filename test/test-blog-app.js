@@ -35,17 +35,12 @@ function tearDownDb() {
   return mongoose.connection.dropDatabase();
 }
 
-//seedBlogData();
-//tearDownDb();
-
 describe('Blog API resource', function() {
   before(function() {
     return runServer(TEST_DATABASE_URL);
   });
 
   beforeEach(function() {
-    //tearDownDb();
-    //console.log(seedBlogData);
     return seedBlogData();
   });
 
@@ -91,11 +86,9 @@ describe('Blog API resource', function() {
           post.should.include.keys('id', 'author', 'title', 'created');
         });
         resBlog = res.body[0];
-        //console.log('resBlog set = ', resBlog);
         return Blog.findById(resBlog.id);
       })
       .then(function(blogPost) {
-        //console.log('get id', blogPost.id, resBlog.id, resBlog.author, blogPost.author.firstName);
         const fullName = `${blogPost.author.firstName} ${blogPost.author
           .lastName}`;
         resBlog.id.should.equal(blogPost.id);
