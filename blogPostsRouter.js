@@ -3,107 +3,95 @@
 const express = require('express');
 const router = express.Router();
 
-const bodyParser = require('body-parser');
-const jsonParser = bodyParser.json();
-const mongoose = require('mongoose');
+const { Blog } = require('./models');
 
-const {Blog} = require('./models');
-
-mongoose.Promise = global.Promise;
-
-
-// function lorem() {
-//   return 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod ' +
-//     'tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, ';
-//   'quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo ' +
-//     'consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse ' +
-//     'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non ' +
-//     'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-// }
-
+/***************************\ GET A POST /***************************/
 
 router.get('/', (req, res) => {
-  Blog
-    .find()
+  Blog.find()
     .then(posts => {
       res.json(posts.map(post => post.apiRepr()));
     })
-    .catch(err => {
-      console.error(err);
-      res.status(500).json({error: 'something went terribly wrong'});
+    .catch(error => {
+      console.error(error);
+      res.status(500).json(error);
     });
 });
 
+/***************************\ GET A POST BY ID /***************************/
+
 router.get('/:id', (req, res) => {
-  Blog
-    .findById(req.params.id)
+  Blog.findById(req.params.id)
     .then(post => {
       res.json(post.apiRepr());
     })
     .catch(error => {
       console.error(error);
-      res.status(500).json({error: 'something went horribly awry'});
+      res.status(500).json(error);
     });
 });
+
+/***************************\ CREATE A POST /***************************/
 
 router.post('/', (req, res) => {
   const requiredFields = ['title', 'content', 'author'];
-  console.log(requiredFields);
   requiredFields.forEach(field => {
-    console.log(field, req.body);
-    // if (!(field in req.body)) {
-    //   const message = `You are missing required field: ${field}`;
-    //   console.log(message);
-    //   return res.status(400).send(message);
-    //}
+    if (!(field in req.body)) {
+      const message = `You are missing required field: ${field}`;
+      console.log(message);
+      return res.status(400).send(message);
+    }
   });
-  const {title, content, author} = req.body;
-  Blog
-    .create({
-      title,
-      content,
-      author
-    })
+  const { title, content } = req.body;
+  const { firstName, lastName } = req.body.author;
+  Blog.create({
+    title,
+    content,
+    author: {
+      firstName,
+      lastName
+    }
+  })
     .then(post => {
       res.status(201).json(post.apiRepr());
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json(error);
     });
 });
 
+/***************************\ UPDATE A POST /***************************/
 
+router.put('/:id', (req, res) => {
+  //console.log(req.body);
+  if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+    res.status(400).json({
+      error: 'Request path id and request body id values must match'
+    });
+  }
+  const updated = {};
+  const updateableFields = ['title', 'content', 'author'];
+  updateableFields.forEach(field => {
+    if (field in req.body) {
+      updated[field] = req.body[field];
+    }
+  });
+  Blog.findByIdAndUpdate(req.params.id, { $set: updated }, { new: true })
+    .then(updated => {
+      res.json(updated.apiRepr());
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json(error);
+    });
+});
 
+/***************************\ DELETE A POST /***************************/
 
-
-// seed some posts so initial GET requests will return something
-// BlogPosts.create(
-//   '10 things -- you won\'t believe #4', lorem(), 'Billy Bob');
-// BlogPosts.create(
-//   'Lions and tigers and bears oh my', lorem(), 'Lefty Lil');
-
-
-  
-// add endpoint for GET. It should call `BlogPosts.get()`
-// and return JSON objects of stored blog posts.
-// send back JSON representation of all blog posts
-// on GET requests to root
-
-
-// add endpoint for POST requests, which should cause a new
-// blog post to be added (using `BlogPosts.create()`). It should
-// return a JSON object representing the new post (including
-// the id, which `BlogPosts` will create. This endpoint should
-// send a 400 error if the post doesn't contain
-// `title`, `content`, and `author`
-
-
-// add endpoint for PUT requests to update blogposts. it should
-// call `BlogPosts.update()` and return the updated post.
-// it should also ensure that the id in the object representing
-// the post matches the id of the path variable, and that the
-// following required fields are in request body: `id`, `title`,
-// `content`, `author`, `publishDate`
-
-// add endpoint for DELETE requests. These requests should
-// have an id as a URL path variable and call
-// `BlogPosts.delete()`
-
+router.delete('/:id', (req, res) => {
+  Blog.findByIdAndRemove(req.params.id).then(() => {
+    res.status(204).end();
+  });
+});
 module.exports = router;

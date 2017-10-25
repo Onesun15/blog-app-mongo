@@ -2,5 +2,5 @@
 
 exports.DATABASE_URL = process.env.DATABASE_URL ||
 global.DATABASE_URL ||
-'mongodb://dev:dev@ds131480.mlab.com:31480/blog-app';
+'mongodb://localhost/seed-data';
 exports.PORT = process.env.PORT || 8080;

@@ -1,5 +1,6 @@
 'use strict';
 
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
@@ -7,25 +8,27 @@ const mongoose = require('mongoose');
 
 const app = express();
 const mongooseRouter = require('./blogPostsRouter');
-const {PORT, DATABASE_URL} = require('./config');
+const { PORT, DATABASE_URL } = require('./config');
 
-app.use(morgan('common'));
-app.use('/blog-posts', mongooseRouter);
+mongoose.Promise = global.Promise;
 
 app.use(bodyParser.json());
+app.use(morgan('dev'));
+app.use('/blog-posts', mongooseRouter);
 
 let server;
-function runServer(databaseUrl=DATABASE_URL, port=PORT) {
+function runServer(databaseUrl = DATABASE_URL, port = PORT) {
   console.log(databaseUrl, 'testing');
   return new Promise((resolve, reject) => {
     mongoose.connect(databaseUrl, err => {
       if (err) {
         return reject(err);
       }
-      server = app.listen(port, () => {
-        console.log(`Your app is listening on port ${port}`);
-        resolve();
-      })
+      server = app
+        .listen(port, () => {
+          console.log(`Your app is listening on port ${port}`);
+          resolve();
+        })
         .on('error', err => {
           mongoose.disconnect();
           reject(err);
@@ -33,16 +36,16 @@ function runServer(databaseUrl=DATABASE_URL, port=PORT) {
     });
   });
 }
-  
+
 // this function closes the server, and returns a promise. we'll
 // use it in our integration tests later.
 function closeServer() {
   return mongoose.disconnect().then(() => {
     return new Promise((resolve, reject) => {
       console.log('Closing server');
-      server.close(err => {
+      server.close(error => {
         if (err) {
-          return reject(err);
+          return reject(error);
         }
         resolve();
       });
@@ -51,7 +54,7 @@ function closeServer() {
 }
 
 if (require.main === module) {
-  runServer().catch(err => console.error(err));
+  runServer().catch(error => console.error(error));
 }
 
-module.exports = {app, runServer, closeServer};
+module.exports = { app, runServer, closeServer };
