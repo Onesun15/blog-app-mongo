@@ -2,3 +2,10 @@ language: node_js
 node_js: node
 services:
 - mongodb
+deploy:
+  provider: heroku
+  api_key:
+    secure: PfgOlmwo+mv+5tdSWjgBvQMUxiWOSQqD4z6Et/0myM6qLLBY1/DaWy0kWACNitaoSIepqNES3w9UqAuID+n/uasvMfHiFQhlHD+CQvVaZmzJo7zLCbd7651Gd4OFXW9d/qBSR/zNgTNEvgptFLYC/bg07snX7nMUD7SiAsTF/Q+/fpEU+zXeqW3NIm2DJvlvyooo2odymtQvTirc51/FuzFKZ0qTXWpA2cRbCDUtay4trau3BjNm8eGImKUX1G2kjFIugtNeb/hjcsy1QcAUpRvcpZCZRIarM2mcRyJ7eBEjntEwkD9wzH6nKWQzAHQbii4G+8OdcqYMBvpYBlefm9P0UW77ApqzgbJUmO2uJktOI2jEUECDn6xPj3u/opZOA9YfClT692A2LX6RJRSHK7CNzM4y+drPp8nD+IyZ5Mb4gJVdKNCzQDkYkco9HgSvGYeu47UMP5K8BkazKVcA35ActOP5Pj4cOp3fZwAD1LDl17PjFU0cYq0Queujb0yK5eWyfvn8hpDXFKH3s16LhOIuwkLUIIY7gONalJbpNGbDojhSBKCpL+y8Ou7b/TmjZUxWMutFjWpRhI7s4+7Jr76m2QoiSfkCqhUjT2DEx6JPMhYNlTkXE25oKJmP6g8kfs2T0apya6NFy4P/Wu5IfCwzOs4tbd44Nza6v0fcXBE=
+  app: blog-app-mongo
+  on:
+    repo: Onesun15/blog-app-mongo
