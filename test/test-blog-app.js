@@ -26,7 +26,6 @@ function seedBlogData() {
       }
     });
   }
-  //console.log('Hello SEEDS:', seedData);
   return Blog.insertMany(seedData);
 }
 
@@ -65,8 +64,7 @@ describe('Blog API resource', function() {
           return Blog.count();
         })
         .then(function(count) {
-          console.log(count, res.body.length);
-          //res.body.should.have.length.of(count);
+          res.body.should.have.lengthOf(count);
         });
     });
   });
@@ -96,6 +94,7 @@ describe('Blog API resource', function() {
         resBlog.title.should.equal(blogPost.title);
       });
   });
+
   describe('POST endpoint', function() {
     it('should add a new blog post', function() {});
     const testPost = {
@@ -136,6 +135,7 @@ describe('Blog API resource', function() {
         post.author.lastName.should.equal(testPost.author.lastName);
       });
   });
+
   describe('PUT endpoint', function() {
     it('should update fields you send over', function() {
       const updateData = {
@@ -166,6 +166,7 @@ describe('Blog API resource', function() {
         });
     });
   });
+
   describe('DELETE endpoint', function() {
     it('should delete a post by id', function() {
       let post;

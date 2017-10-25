@@ -20,7 +20,6 @@ app.get('/' , (req, res) => res.send('Hello World!!!!!'));
 
 let server;
 function runServer(databaseUrl = DATABASE_URL, port = PORT) {
-  console.log(databaseUrl, 'testing');
   return new Promise((resolve, reject) => {
     mongoose.connect(databaseUrl, err => {
       if (err) {
