@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 app.use('/blog-posts', mongooseRouter);
 
-app.get('/' , (req, res) => res.send('Hello World!!!!!'));
+app.get('/', (req, res) => res.send('Hello World!!!!!'));
 
 let server;
 function runServer(databaseUrl = DATABASE_URL, port = PORT) {
@@ -38,8 +38,6 @@ function runServer(databaseUrl = DATABASE_URL, port = PORT) {
   });
 }
 
-// this function closes the server, and returns a promise. we'll
-// use it in our integration tests later.
 function closeServer() {
   return mongoose.disconnect().then(() => {
     return new Promise((resolve, reject) => {

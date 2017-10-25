@@ -54,7 +54,10 @@ router.post('/', (req, res) => {
   })
     .then(post => {
       //res.status(201).json(post.apiRepr());
-      res.location(`${post._id}`).status(201).json(post.apiRepr());
+      res
+        .location(`${post._id}`)
+        .status(201)
+        .json(post.apiRepr());
     })
     .catch(error => {
       console.error(error);
