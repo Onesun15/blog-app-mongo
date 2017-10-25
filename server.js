@@ -16,6 +16,8 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 app.use('/blog-posts', mongooseRouter);
 
+app.get('/' , (req, res) => console.log('Hello World'));
+
 let server;
 function runServer(databaseUrl = DATABASE_URL, port = PORT) {
   console.log(databaseUrl, 'testing');
