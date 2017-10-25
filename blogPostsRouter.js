@@ -80,7 +80,7 @@ router.put('/:id', (req, res) => {
   });
   Blog.findByIdAndUpdate(req.params.id, { $set: updated }, { new: true })
     .then(updated => {
-      res.json(updated.apiRepr());
+      res.status(204).json(updated.apiRepr());
     })
     .catch(error => {
       console.error(error);
