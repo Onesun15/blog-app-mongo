@@ -2,10 +2,130 @@
 
 const express = require('express');
 const router = express.Router();
+const { BasicStrategy } = require('passport-http');
+const passport = require('passport');
 
-const { Blog } = require('./models');
+const { Blog, User } = require('./models');
 
-/***************************\ GET A POST /***************************/
+/***************************\ Validation Strategy /***************************/
+
+const basicStrategy = new BasicStrategy(function(username, password, done) {
+  let user;
+  User.findOne({ username: username })
+    .then(_user => {
+      user = _user;
+      if (!user) {
+        return done(null, false);
+      }
+      return user.validatePassword(password);
+    })
+    .then(isValid => {
+      if (!isValid) {
+        return done(null, false);
+      } else {
+        return done(null, user);
+      }
+    })
+    .catch(err => done(err));
+});
+
+passport.use(basicStrategy);
+router.use(passport.initialize());
+const authenticate = passport.authenticate('basic', { session: false });
+
+/***************************\ New User Validation /***************************/
+
+router.post('/users', (req, res) => {
+  const requiredFields = ['username', 'password', 'firstName', 'lastName'];
+  requiredFields.forEach(field => {
+    if (!(field in req.body)) {
+      const message = `You are missing required field: ${field}`;
+      console.log(message);
+      return res.status(400).send(message);
+    }
+  });
+  let { username, password, firstName, lastName } = req.body;
+
+  if (!req.body) {
+    return res.status(400).json({ message: 'No request body' });
+  }
+
+  if (!('username' in req.body)) {
+    return res.status(422).json({ message: 'Missing field: username' });
+  }
+
+  if (typeof username !== 'string') {
+    return res.status(422).json({ message: 'Incorrect field type: username' });
+  }
+
+  username = username.trim();
+
+  if (username === '') {
+    return res
+      .status(422)
+      .json({ message: 'Incorrect field length: username' });
+  }
+
+  if (!password) {
+    return res.status(422).json({ message: 'Missing field: password' });
+  }
+
+  if (typeof password !== 'string') {
+    return res.status(422).json({ message: 'Incorrect field type: password' });
+  }
+
+  password = password.trim();
+
+  if (password === '') {
+    return res
+      .status(422)
+      .json({ message: 'Incorrect field length: password' });
+  }
+
+  return User.find({ username })
+    .count()
+    .then(count => {
+      if (count > 0) {
+        return Promise.reject({
+          code: 422,
+          reason: 'ValidationError',
+          message: 'Username already taken',
+          location: 'username'
+        });
+      }
+      return User.hashPassword(password);
+    })
+    .then(hash => {
+      return User.create({
+        username: username,
+        password: hash,
+        firstName: firstName,
+        lastName: lastName
+      });
+    })
+    .then(user => {
+      return res.status(201).json(user.apiRepr());
+    })
+    .catch(err => {
+      if (err.reason === 'ValidationError') {
+        return res.status(err.code).json(err);
+      }
+      res.status(500).json({ code: 500, message: 'Internal server error' });
+    });
+});
+
+/***************************\ GET POST & USERS /***************************/
+
+router.get('/users', (req, res) => {
+  User.find()
+    .then(users => {
+      res.json(users.map(user => user.apiRepr()));
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json(error);
+    });
+});
 
 router.get('/', (req, res) => {
   Blog.find()
@@ -33,7 +153,7 @@ router.get('/:id', (req, res) => {
 
 /***************************\ CREATE A POST /***************************/
 
-router.post('/', (req, res) => {
+router.post('/', authenticate, (req, res) => {
   const requiredFields = ['title', 'content', 'author'];
   requiredFields.forEach(field => {
     if (!(field in req.body)) {
@@ -43,7 +163,7 @@ router.post('/', (req, res) => {
     }
   });
   const { title, content } = req.body;
-  const { firstName, lastName } = req.body.author;
+  const { firstName, lastName } = req.user;
   Blog.create({
     title,
     content,
@@ -53,7 +173,6 @@ router.post('/', (req, res) => {
     }
   })
     .then(post => {
-      //res.status(201).json(post.apiRepr());
       res
         .location(`${post._id}`)
         .status(201)
@@ -67,8 +186,7 @@ router.post('/', (req, res) => {
 
 /***************************\ UPDATE A POST /***************************/
 
-router.put('/:id', (req, res) => {
-  //console.log(req.body);
+router.put('/:id', authenticate, (req, res) => {
   if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     res.status(400).json({
       error: 'Request path id and request body id values must match'
@@ -93,9 +211,10 @@ router.put('/:id', (req, res) => {
 
 /***************************\ DELETE A POST /***************************/
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authenticate, (req, res) => {
   Blog.findByIdAndRemove(req.params.id).then(() => {
     res.status(204).end();
   });
 });
+
 module.exports = router;

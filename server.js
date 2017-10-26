@@ -6,6 +6,8 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
+//const {router: usersRouter} = require('./users');
+
 const app = express();
 const mongooseRouter = require('./blogPostsRouter');
 const { PORT, DATABASE_URL } = require('./config');
