@@ -2,22 +2,31 @@
 
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
+const passport = require('passport');
 const morgan = require('morgan');
+const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-
-//const {router: usersRouter} = require('./users');
+const { basicStrategy, jwtStrategy } = require('./auth/strategies');
 
 const app = express();
-const mongooseRouter = require('./blogPostsRouter');
+const { router: usersRouter } = require('./routers/usersRouter');
+const { router: blogpostRouter } = require('./routers/blogPostsRouter');
+const { router: apiRouter } = require('./routers/apiRouter');
 const { PORT, DATABASE_URL } = require('./config');
 
 mongoose.Promise = global.Promise;
 
+passport.use(basicStrategy);
+passport.use(jwtStrategy);
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-app.use('/blog-posts', mongooseRouter);
+app.use(cors());
+app.use('/users', usersRouter);
+app.use('/blog-posts', blogpostRouter);
+app.use('/api', apiRouter);
 
 app.get('/', (req, res) => res.send('Hello World!!!!!'));
 
