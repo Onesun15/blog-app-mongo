@@ -97,10 +97,10 @@ router.post('/users', (req, res) => {
     })
     .then(hash => {
       return User.create({
-        username: username,
+        username,
         password: hash,
-        firstName: firstName,
-        lastName: lastName
+        firstName,
+        lastName
       });
     })
     .then(user => {
@@ -174,7 +174,7 @@ router.post('/', authenticate, (req, res) => {
   })
     .then(post => {
       res
-        .location(`${post._id}`)
+        .location(post._id)
         .status(201)
         .json(post.apiRepr());
     })

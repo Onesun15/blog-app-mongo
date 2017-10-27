@@ -15,6 +15,7 @@ const { PORT, DATABASE_URL } = require('./config');
 mongoose.Promise = global.Promise;
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan('dev'));
 app.use('/blog-posts', mongooseRouter);
 
